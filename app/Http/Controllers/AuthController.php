@@ -60,7 +60,7 @@ class AuthController extends Controller
         if ($user->two_factor_enabled) {
             session(['2fa_user_id' => $user->id]);
             Auth::logout();
-            return redirect()->route('2fa.verify');
+            return redirect()->route('two-factor.verify');
         }
 
         return redirect()->route('home');

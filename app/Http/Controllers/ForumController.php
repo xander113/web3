@@ -61,7 +61,7 @@ class ForumController extends Controller
         Forum::find($request->forum_id)->increment('post_count');
         Auth::user()->increment('post_count');
         Auth::user()->update(['last_post_at' => now()]);
-        return redirect()->route('forum.topic', $topic->id);
+        return redirect()->route('forum.topic.show', $topic->id);
     }
 
     public function storeReply(Request $request, int $topicId)

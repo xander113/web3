@@ -20,7 +20,7 @@ class MessageController extends Controller
         return Inertia::render('Messages/Index', ['messages' => $messages]);
     }
 
-    public function show(int $id)
+    public function show(string $id)
     {
         $message = Message::where('id', $id)
             ->where(fn($q) => $q->where('receiver_id', Auth::id())->orWhere('sender_id', Auth::id()))
@@ -32,7 +32,7 @@ class MessageController extends Controller
         return Inertia::render('Messages/Show', ['message' => $message]);
     }
 
-    public function create(int $userId)
+    public function create(string $userId)
     {
         $receiver = User::findOrFail($userId);
         return Inertia::render('Messages/Create', ['receiver' => $receiver]);
@@ -56,7 +56,7 @@ class MessageController extends Controller
         return redirect()->route('messages.index')->with('success', 'Message sent.');
     }
 
-    public function destroy(int $id)
+    public function destroy(string $id)
     {
         $message = Message::findOrFail($id);
         if ($message->receiver_id === Auth::id()) $message->update(['receiver_deleted' => true]);

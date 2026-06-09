@@ -50,7 +50,7 @@ class SettingsController extends Controller
         }
         Auth::user()->update(['two_factor_enabled' => true, 'two_factor_secret' => $secret]);
         session()->forget('2fa_secret');
-        return redirect()->route('settings')->with('success', '2FA enabled.');
+        return redirect()->route('settings.index')->with('success', '2FA enabled.');
     }
 
     public function disable2fa(Request $request)
@@ -61,6 +61,6 @@ class SettingsController extends Controller
             return back()->withErrors(['code' => 'Invalid code.']);
         }
         Auth::user()->update(['two_factor_enabled' => false, 'two_factor_secret' => null]);
-        return redirect()->route('settings')->with('success', '2FA disabled.');
+        return redirect()->route('settings.index')->with('success', '2FA disabled.');
     }
 }
