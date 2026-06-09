@@ -52,7 +52,7 @@
         </div>
 
         <!-- Ban notice -->
-        <div v-if="profile.banned_at" class="mt-4 bg-red-900/50 border border-red-700 rounded p-3 text-sm text-red-300">
+        <div v-if="profile.banned" class="mt-4 bg-red-900/50 border border-red-700 rounded p-3 text-sm text-red-300">
           This user is banned. Reason: {{ profile.ban_reason ?? 'No reason given' }}
         </div>
       </div>

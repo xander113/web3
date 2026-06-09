@@ -47,7 +47,7 @@ const props = defineProps({
   forum: { type: Object, required: true },
 })
 
-const form = useForm({ title: '', body: '' })
+const form = useForm({ forum_id: props.forum.id, title: '', body: '' })
 
 function submit() {
   form.post(route('forum.topic.store', props.forum.id))

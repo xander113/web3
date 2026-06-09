@@ -31,7 +31,7 @@ class AdminController extends Controller
         return Inertia::render('Admin/Users', ['users' => $users, 'search' => $request->search]);
     }
 
-    public function ban(Request $request, int $id)
+    public function ban(Request $request, string $id)
     {
         $request->validate(['reason' => ['required', 'string', 'max:500']]);
         $user = User::findOrFail($id);
@@ -40,7 +40,7 @@ class AdminController extends Controller
         return back()->with('success', 'User banned.');
     }
 
-    public function unban(int $id)
+    public function unban(string $id)
     {
         User::findOrFail($id)->update(['banned' => false, 'ban_reason' => null]);
         return back()->with('success', 'User unbanned.');
@@ -53,13 +53,13 @@ class AdminController extends Controller
         return Inertia::render('Admin/Assets', ['items' => $items]);
     }
 
-    public function approveAsset(int $id)
+    public function approveAsset(string $id)
     {
         CatalogItem::findOrFail($id)->update(['approved' => true]);
         return back()->with('success', 'Asset approved.');
     }
 
-    public function declineAsset(int $id)
+    public function declineAsset(string $id)
     {
         CatalogItem::findOrFail($id)->update(['declined' => true]);
         return back()->with('success', 'Asset declined.');

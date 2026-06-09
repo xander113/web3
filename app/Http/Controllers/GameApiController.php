@@ -210,7 +210,8 @@ class GameApiController extends Controller
     }
 
     /**
-     * Serve a catalog asset (.rbxm model file) by place/asset ID.
+     * Serve an .rbxm asset by ID.
+     * Checks catalog items first, then game server place files.
      * Mirrors /Asset/?id={id}
      */
     public function serveAsset(Request $request)
@@ -218,16 +219,31 @@ class GameApiController extends Controller
         $id = $request->query('id');
         if (!$id) abort(400);
 
+        // Catalog item asset
         $item = CatalogItem::find($id);
-        if (!$item || !$item->data_file) abort(404);
+        if ($item && $item->data_file) {
+            $path = 'assets/' . $item->type . '/' . $item->data_file . '.rbxm';
+            if (Storage::disk('local')->exists($path)) {
+                return response()->file(
+                    Storage::disk('local')->path($path),
+                    ['Content-Type' => 'application/octet-stream']
+                );
+            }
+        }
 
-        $path = 'assets/' . $item->type . '/' . $item->data_file . '.rbxm';
-        if (!Storage::disk('local')->exists($path)) abort(404);
+        // Game server place file
+        $server = GameServer::find($id);
+        if ($server && $server->place_file) {
+            $path = 'places/' . $server->place_file . '.rbxm';
+            if (Storage::disk('local')->exists($path)) {
+                return response()->file(
+                    Storage::disk('local')->path($path),
+                    ['Content-Type' => 'application/octet-stream']
+                );
+            }
+        }
 
-        return response()->file(
-            Storage::disk('local')->path($path),
-            ['Content-Type' => 'application/octet-stream']
-        );
+        abort(404);
     }
 
     /**

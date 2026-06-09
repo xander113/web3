@@ -7,7 +7,7 @@
             <h1 class="text-2xl font-bold text-gray-100">{{ group.name }}</h1>
             <p class="text-sm text-gray-400 mt-1">
               Created by
-              <Link :href="route('profile.show', group.owner?.id)" class="text-indigo-400 hover:underline">{{ group.owner?.username }}</Link>
+              <Link :href="route('profile.show', group.creator?.id)" class="text-indigo-400 hover:underline">{{ group.creator?.username }}</Link>
             </p>
             <p class="text-gray-500 text-sm">{{ group.members_count ?? group.members?.length ?? 0 }} members</p>
           </div>
@@ -63,6 +63,6 @@ function joinGroup() {
   groupForm.post(route('groups.join', props.group.id))
 }
 function leaveGroup() {
-  groupForm.delete(route('groups.leave', props.group.id))
+  groupForm.post(route('groups.leave', props.group.id))
 }
 </script>

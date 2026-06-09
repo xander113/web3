@@ -12,6 +12,8 @@ class User extends Authenticatable
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret'];
 
+    protected $appends = ['is_admin', 'is_mod', 'is_online'];
+
     protected function casts(): array
     {
         return [
@@ -29,15 +31,14 @@ class User extends Authenticatable
         ];
     }
 
-    // Rank helpers
+    // Rank helpers (also exposed as JSON attributes via $appends)
     public function isAdmin(): bool { return $this->rank === 1; }
     public function isModerator(): bool { return $this->rank >= 1; }
+    public function isOnline(): bool { return $this->last_seen_at && $this->last_seen_at->gt(now()->subMinutes(5)); }
 
-    // Online status (active in last 5 minutes)
-    public function isOnline(): bool
-    {
-        return $this->last_seen_at && $this->last_seen_at->gt(now()->subMinutes(5));
-    }
+    public function getIsAdminAttribute(): bool { return $this->isAdmin(); }
+    public function getIsModAttribute(): bool { return $this->isModerator(); }
+    public function getIsOnlineAttribute(): bool { return $this->isOnline(); }
 
     // Relationships
     public function friends() { return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id'); }

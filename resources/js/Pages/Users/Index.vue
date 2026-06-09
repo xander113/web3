@@ -27,8 +27,8 @@
           ></span>
         </div>
         <span class="text-sm text-gray-200 truncate w-full text-center font-medium">{{ user.username }}</span>
-        <span v-if="user.is_admin" class="text-xs bg-red-800 text-red-300 px-2 py-0.5 rounded">Admin</span>
-        <span v-else-if="user.is_mod" class="text-xs bg-yellow-800 text-yellow-300 px-2 py-0.5 rounded">Mod</span>
+        <span v-if="user.rank === 1" class="text-xs bg-red-800 text-red-300 px-2 py-0.5 rounded">Admin</span>
+        <span v-else-if="user.rank === 2" class="text-xs bg-yellow-800 text-yellow-300 px-2 py-0.5 rounded">Mod</span>
       </Link>
     </div>
 

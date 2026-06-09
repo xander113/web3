@@ -34,11 +34,11 @@
             <td class="px-4 py-3 text-gray-400">{{ user.email }}</td>
             <td class="px-4 py-3 text-gray-400">{{ formatDate(user.created_at) }}</td>
             <td class="px-4 py-3">
-              <span v-if="user.banned_at" class="bg-red-900 text-red-300 text-xs px-2 py-0.5 rounded">Banned</span>
+              <span v-if="user.banned" class="bg-red-900 text-red-300 text-xs px-2 py-0.5 rounded">Banned</span>
               <span v-else class="bg-green-900 text-green-300 text-xs px-2 py-0.5 rounded">Active</span>
             </td>
             <td class="px-4 py-3">
-              <div v-if="user.banned_at" class="flex items-center gap-2">
+              <div v-if="user.banned" class="flex items-center gap-2">
                 <form @submit.prevent="unbanUser(user.id)">
                   <button class="bg-green-700 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">Unban</button>
                 </form>
@@ -148,6 +148,6 @@ function submitBan() {
 
 const unbanForm = useForm({})
 function unbanUser(userId) {
-  unbanForm.delete(route('admin.users.unban', userId))
+  unbanForm.post(route('admin.users.unban', userId))
 }
 </script>
