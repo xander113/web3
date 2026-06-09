@@ -2,7 +2,7 @@
   <AppLayout>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-100">Messages</h1>
-      <Link href="/messages/create" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm font-semibold">New Message</Link>
+      <Link :href="route('users.index')" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm font-semibold">New Message</Link>
     </div>
 
     <div class="bg-gray-800 rounded-xl overflow-hidden">

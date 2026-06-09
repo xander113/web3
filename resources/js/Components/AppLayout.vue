@@ -52,6 +52,16 @@ function navClass(routeName) {
                     style="text-decoration:none;">
                 Users
               </Link>
+              <Link :href="route('games.index')"
+                    class="px-3 py-3 text-sm font-medium transition border-b-2 border-transparent hover:border-[#1b6182] hover:text-white text-gray-300"
+                    style="text-decoration:none;">
+                Games
+              </Link>
+              <Link :href="route('groups.index')"
+                    class="px-3 py-3 text-sm font-medium transition border-b-2 border-transparent hover:border-[#1b6182] hover:text-white text-gray-300"
+                    style="text-decoration:none;">
+                Groups
+              </Link>
             </div>
           </div>
 
@@ -132,6 +142,13 @@ function navClass(routeName) {
                         @click="dropdownOpen = false">
                     Admin Panel
                   </Link>
+                  <Link v-if="user.rank >= 1"
+                        :href="route('admin.diagnostics')"
+                        class="block px-4 py-2 text-sm font-semibold transition"
+                        style="text-decoration:none; color:#f0c040;"
+                        @click="dropdownOpen = false">
+                    Diagnostics
+                  </Link>
                   <div style="border-top:1px solid #383838; margin:0.25rem 0;"></div>
                   <Link :href="route('logout')" method="post" as="button"
                         class="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:text-white transition"
@@ -171,6 +188,8 @@ function navClass(routeName) {
             <li><Link :href="route('catalog.index')" @click="mobileOpen=false">Catalog</Link></li>
             <li><Link :href="route('forum.index')" @click="mobileOpen=false">Forum</Link></li>
             <li><Link :href="route('users.index')" @click="mobileOpen=false">Users</Link></li>
+            <li><Link :href="route('games.index')" @click="mobileOpen=false">Games</Link></li>
+            <li><Link :href="route('groups.index')" @click="mobileOpen=false">Groups</Link></li>
             <template v-if="user">
               <li><Link :href="route('friends.index')" @click="mobileOpen=false">Friends</Link></li>
               <li><Link :href="route('messages.index')" @click="mobileOpen=false">Messages</Link></li>

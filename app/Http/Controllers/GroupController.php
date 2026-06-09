@@ -8,7 +8,16 @@ use Inertia\Inertia;
 
 class GroupController extends Controller
 {
-    public function show(int $id)
+    public function index()
+    {
+        $groups = Group::withCount('members')
+            ->with('creator:id,username')
+            ->orderByDesc('member_count')
+            ->paginate(20);
+        return Inertia::render('Groups/Index', ['groups' => $groups]);
+    }
+
+    public function show(string $id)
     {
         $group = Group::with(['creator:id,username', 'members:id,username,last_seen_at'])->findOrFail($id);
         $isMember = $group->members()->where('users.id', Auth::id())->exists();
@@ -40,7 +49,7 @@ class GroupController extends Controller
         return redirect()->route('groups.show', $group->id)->with('success', 'Group created!');
     }
 
-    public function join(int $id)
+    public function join(string $id)
     {
         $user = Auth::user();
         $group = Group::findOrFail($id);
@@ -54,7 +63,7 @@ class GroupController extends Controller
         return back()->with('success', 'Joined group.');
     }
 
-    public function leave(int $id)
+    public function leave(string $id)
     {
         $group = Group::findOrFail($id);
         if ($group->creator_id === Auth::id()) {

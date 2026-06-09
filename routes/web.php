@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CharacterController;
+use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\GameApiController;
@@ -53,7 +54,11 @@ Route::prefix('catalog')->name('catalog.')->group(function () {
     Route::get('/{id}', [CatalogController::class, 'show'])->name('show');
 });
 
+// Games (public read)
+Route::get('/games', [GameServerController::class, 'index'])->name('games.index');
+
 // Groups (public read) — /new MUST be before /{id} wildcard
+Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
 Route::get('/groups/new', [GroupController::class, 'create'])->middleware('auth')->name('groups.create');
 Route::get('/groups/{id}', [GroupController::class, 'show'])->name('groups.show');
 
@@ -74,9 +79,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/friends/decline/{id}', [FriendController::class, 'decline'])->name('friends.decline');
     Route::delete('/friends/remove/{id}', [FriendController::class, 'remove'])->name('friends.remove');
 
-    // Messages
+    // Messages — specific routes MUST precede the {id} wildcard
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/new/{userId}', [MessageController::class, 'create'])->name('messages.create');
+    Route::get('/messages/compose', fn() => redirect()->route('users.index'))->name('messages.compose');
     Route::get('/messages/{id}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::delete('/messages/{id}', [MessageController::class, 'destroy'])->name('messages.destroy');
@@ -121,6 +127,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
         Route::post('/reports/{id}/resolve', [AdminController::class, 'resolveReport'])->name('reports.resolve');
         Route::post('/reports/{id}/dismiss', [AdminController::class, 'resolveReport'])->name('reports.dismiss');
+        // Diagnostics / Cloud Compute testing
+        Route::get('/diagnostics', [DiagnosticsController::class, 'index'])->name('diagnostics');
+        Route::post('/diagnostics/ping', [DiagnosticsController::class, 'pingCloudCompute'])->name('diagnostics.ping');
+        Route::post('/diagnostics/render-avatar', [DiagnosticsController::class, 'renderAvatar'])->name('diagnostics.render_avatar');
+        Route::post('/diagnostics/render-item', [DiagnosticsController::class, 'renderCatalogItem'])->name('diagnostics.render_item');
+        Route::post('/diagnostics/stress', [DiagnosticsController::class, 'stressRender'])->name('diagnostics.stress');
+        Route::post('/diagnostics/test-join', [DiagnosticsController::class, 'testGameJoin'])->name('diagnostics.test_join');
     });
 });
 

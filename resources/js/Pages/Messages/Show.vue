@@ -19,7 +19,7 @@
           </div>
           <div class="flex gap-2 shrink-0">
             <Link
-              :href="route('messages.create', { receiver: message.sender?.username })"
+              :href="route('messages.create', message.sender?.id)"
               class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm font-semibold"
             >Reply</Link>
             <form @submit.prevent="deleteMessage">

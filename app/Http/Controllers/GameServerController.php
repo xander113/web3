@@ -9,6 +9,16 @@ use Inertia\Inertia;
 
 class GameServerController extends Controller
 {
+    public function index()
+    {
+        $servers = GameServer::where('is_public', true)
+            ->with('creator:id,username')
+            ->withCount('players')
+            ->orderByDesc('updated_at')
+            ->paginate(20);
+        return Inertia::render('Games/Index', ['servers' => $servers]);
+    }
+
     public function create() { return Inertia::render('Games/Create'); }
 
     public function store(Request $request)

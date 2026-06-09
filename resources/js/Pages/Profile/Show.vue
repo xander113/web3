@@ -26,7 +26,7 @@
               <Link :href="route('settings.index')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm text-center">Edit Profile</Link>
             </template>
             <template v-else-if="auth.user">
-              <Link :href="route('messages.create', { receiver: profile.username })" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm text-center">Send Message</Link>
+              <Link :href="route('messages.create', profile.id)" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm text-center">Send Message</Link>
               <template v-if="receivedRequest">
                 <form @submit.prevent="acceptRequest">
                   <button class="w-full bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm">Accept Request</button>
