@@ -73,7 +73,7 @@ class AdminController extends Controller
         return Inertia::render('Admin/Reports', ['reports' => $reports]);
     }
 
-    public function resolveReport(Request $request, int $id)
+    public function resolveReport(Request $request, string $id)
     {
         $request->validate(['status' => ['required', 'in:reviewed,dismissed']]);
         Report::findOrFail($id)->update(['status' => $request->status, 'reviewed_by' => auth()->id()]);

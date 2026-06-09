@@ -81,7 +81,7 @@ class ForumController extends Controller
         $topic->update(['last_activity_at' => now()]);
         Auth::user()->increment('post_count');
         Auth::user()->update(['last_post_at' => now()]);
-        broadcast(new ForumReplyPosted($reply->load('user')))->toOthers();
+        try { broadcast(new ForumReplyPosted($reply->load('user')))->toOthers(); } catch (\Exception) {}
         return back()->with('success', 'Reply posted.');
     }
 

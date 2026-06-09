@@ -7,7 +7,7 @@
             <h1 class="text-2xl font-bold text-gray-100">{{ group.name }}</h1>
             <p class="text-sm text-gray-400 mt-1">
               Created by
-              <Link :href="route('profile.show', group.owner?.username)" class="text-indigo-400 hover:underline">{{ group.owner?.username }}</Link>
+              <Link :href="route('profile.show', group.owner?.id)" class="text-indigo-400 hover:underline">{{ group.owner?.username }}</Link>
             </p>
             <p class="text-gray-500 text-sm">{{ group.members_count ?? group.members?.length ?? 0 }} members</p>
           </div>
@@ -30,7 +30,7 @@
           <Link
             v-for="member in group.members"
             :key="member.id"
-            :href="route('profile.show', member.username)"
+            :href="route('profile.show', member.id)"
             class="flex flex-col items-center gap-1 hover:opacity-80"
           >
             <div class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center font-bold">

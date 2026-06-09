@@ -18,7 +18,7 @@
           <p class="text-sm text-gray-400 capitalize">Type: {{ item.type }}</p>
           <p class="text-sm text-gray-400">
             By:
-            <Link :href="route('profile.show', item.creator?.username)" class="text-indigo-400 hover:underline">
+            <Link :href="route('profile.show', item.creator?.id)" class="text-indigo-400 hover:underline">
               {{ item.creator?.username ?? 'Graphictoria' }}
             </Link>
           </p>

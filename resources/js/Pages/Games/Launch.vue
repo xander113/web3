@@ -82,7 +82,11 @@ const downloadUrl = '/downloads/graphictoria-' + (props.isStudio ? 'studio' : 'p
 
 function doLaunch() {
   launched.value = true
-  // Open the custom URI scheme — the browser will hand it off to the installed client
-  window.location.href = props.launchUri
+  // Use an anchor element click — window.location.href throws DOMException for custom URI schemes
+  const a = document.createElement('a')
+  a.href = props.launchUri
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
 </script>

@@ -27,6 +27,7 @@
             </template>
             <template v-else-if="auth.user">
               <Link :href="route('messages.create', profile.id)" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm text-center">Send Message</Link>
+              <button @click="reportModal = true" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm text-left text-gray-400">Report</button>
               <template v-if="receivedRequest">
                 <form @submit.prevent="acceptRequest">
                   <button class="w-full bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm">Accept Request</button>
@@ -86,7 +87,7 @@
           <Link
             v-for="friend in profile.friends.slice(0, 6)"
             :key="friend.id"
-            :href="route('profile.show', friend.username)"
+            :href="route('profile.show', friend.id)"
             class="flex flex-col items-center gap-1 hover:opacity-80"
           >
             <div class="w-12 h-12 rounded-full bg-indigo-700 flex items-center justify-center font-bold">
@@ -143,11 +144,40 @@
         </div>
       </div>
     </div>
+
+    <!-- Report Modal -->
+    <div v-if="reportModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md space-y-4">
+        <h3 class="text-lg font-semibold text-gray-100">Report {{ profile.username }}</h3>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Reason</label>
+          <select v-model="reportForm.reason" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100 focus:outline-none focus:border-indigo-500 mb-2">
+            <option value="">Select a reason…</option>
+            <option>Harassment or bullying</option>
+            <option>Inappropriate content</option>
+            <option>Spam or scamming</option>
+            <option>Exploiting or cheating</option>
+            <option>Other</option>
+          </select>
+          <textarea v-model="reportForm.reason" rows="3" placeholder="Describe the issue…"
+            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100 focus:outline-none focus:border-indigo-500 text-sm"></textarea>
+          <p v-if="reportForm.errors.reason" class="text-red-400 text-xs mt-1">{{ reportForm.errors.reason }}</p>
+        </div>
+        <div class="flex gap-3">
+          <form @submit.prevent="submitReport">
+            <button class="bg-red-700 hover:bg-red-600 px-5 py-2 rounded font-semibold text-sm" :disabled="reportForm.processing">
+              {{ reportForm.processing ? 'Submitting…' : 'Submit Report' }}
+            </button>
+          </form>
+          <button @click="reportModal = false" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded font-semibold text-sm">Cancel</button>
+        </div>
+      </div>
+    </div>
   </AppLayout>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Components/AppLayout.vue'
 
@@ -155,12 +185,13 @@ const props = defineProps({
   profile: { type: Object, required: true },
   isFriend: { type: Boolean, default: false },
   hasPendingRequest: { type: Boolean, default: false },
-  receivedRequest: { type: Boolean, default: false },
+  receivedRequest: { type: Object, default: null },
 })
 
 const page = usePage()
 const auth = computed(() => page.props.auth ?? { user: null })
 const isOwnProfile = computed(() => auth.value.user?.id === props.profile.id)
+const reportModal = ref(false)
 
 function formatDate(dateStr) {
   if (!dateStr) return 'Never'
@@ -168,14 +199,21 @@ function formatDate(dateStr) {
 }
 
 const friendForm = useForm({})
+const reportForm = useForm({ reason: '' })
+
+function submitReport() {
+  reportForm.post(route('users.report', props.profile.id), {
+    onSuccess: () => { reportModal.value = false; reportForm.reset() },
+  })
+}
 
 function sendFriendRequest() {
   friendForm.post(route('friends.request', props.profile.id))
 }
 function acceptRequest() {
-  friendForm.post(route('friends.accept', props.profile.id))
+  friendForm.post(route('friends.accept', props.receivedRequest.id))
 }
 function declineRequest() {
-  friendForm.delete(route('friends.decline', props.profile.id))
+  friendForm.post(route('friends.decline', props.receivedRequest.id))
 }
 </script>

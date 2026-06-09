@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\ForumController;
@@ -71,6 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/2fa/setup', [SettingsController::class, 'setup2fa'])->name('settings.2fa.setup');
     Route::post('/settings/2fa/enable', [SettingsController::class, 'enable2fa'])->name('two-factor.enable');
     Route::post('/settings/2fa/disable', [SettingsController::class, 'disable2fa'])->name('two-factor.disable');
+
+    // Reports
+    Route::post('/users/{id}/report', [ReportController::class, 'store'])->name('users.report');
 
     // Friends
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');

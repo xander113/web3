@@ -7,11 +7,11 @@
             <h1 class="text-xl font-bold text-gray-100">{{ message.subject }}</h1>
             <p class="text-sm text-gray-400 mt-1">
               From:
-              <Link :href="route('profile.show', message.sender?.username)" class="text-indigo-400 hover:underline">
+              <Link :href="route('profile.show', message.sender?.id)" class="text-indigo-400 hover:underline">
                 {{ message.sender?.username ?? 'Unknown' }}
               </Link>
               &rarr;
-              <Link :href="route('profile.show', message.receiver?.username)" class="text-indigo-400 hover:underline">
+              <Link :href="route('profile.show', message.receiver?.id)" class="text-indigo-400 hover:underline">
                 {{ message.receiver?.username ?? 'Unknown' }}
               </Link>
             </p>

@@ -14,7 +14,7 @@
       <Link
         v-for="user in users.data"
         :key="user.id"
-        :href="route('profile.show', user.username)"
+        :href="route('profile.show', user.id)"
         class="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 flex flex-col items-center gap-2 transition"
       >
         <div class="relative">

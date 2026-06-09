@@ -26,7 +26,7 @@
           :key="friend.id"
           class="bg-gray-800 rounded-lg p-4 flex items-center justify-between gap-3"
         >
-          <Link :href="route('profile.show', friend.username)" class="flex items-center gap-3 hover:opacity-80">
+          <Link :href="route('profile.show', friend.id)" class="flex items-center gap-3 hover:opacity-80">
             <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold">
               {{ friend.username[0].toUpperCase() }}
             </div>
@@ -48,11 +48,11 @@
           :key="req.id"
           class="bg-gray-800 rounded-lg p-4 flex items-center justify-between gap-3"
         >
-          <Link :href="route('profile.show', req.username)" class="flex items-center gap-3 hover:opacity-80">
+          <Link :href="route('profile.show', req.sender?.id)" class="flex items-center gap-3 hover:opacity-80">
             <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold">
-              {{ req.username[0].toUpperCase() }}
+              {{ req.sender?.username?.[0]?.toUpperCase() }}
             </div>
-            <span class="text-gray-200 font-medium">{{ req.username }}</span>
+            <span class="text-gray-200 font-medium">{{ req.sender?.username }}</span>
           </Link>
           <div class="flex gap-2">
             <form @submit.prevent="acceptRequest(req.id)">
@@ -97,7 +97,7 @@ function acceptRequest(userId) {
   })
 }
 function declineRequest(userId) {
-  actionForm.delete(route('friends.decline', userId), {
+  actionForm.post(route('friends.decline', userId), {
     onSuccess: () => {
       requestList.value = requestList.value.filter((r) => r.id !== userId)
     },
@@ -109,8 +109,8 @@ onMounted(() => {
   if (!window.Echo || !auth.value.user) return
   userChannel = window.Echo.private(`user.${auth.value.user.id}`)
   userChannel.listen('FriendRequestSent', (e) => {
-    if (!requestList.value.find((r) => r.id === e.from_id)) {
-      requestList.value.push({ id: e.from_id, username: e.from_username })
+    if (!requestList.value.find((r) => r.id === e.id)) {
+      requestList.value.push({ id: e.id, sender: { id: e.sender?.id, username: e.sender?.username } })
     }
   })
 })

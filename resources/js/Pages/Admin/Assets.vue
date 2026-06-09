@@ -31,7 +31,7 @@
               </td>
               <td class="px-4 py-3 text-gray-400 capitalize">{{ item.type }}</td>
               <td class="px-4 py-3">
-                <Link :href="route('profile.show', item.creator?.username)" class="text-indigo-400 hover:underline">
+                <Link :href="route('profile.show', item.creator?.id)" class="text-indigo-400 hover:underline">
                   {{ item.creator?.username ?? 'Unknown' }}
                 </Link>
               </td>
@@ -86,9 +86,9 @@ function formatDate(dateStr) {
 
 const actionForm = useForm({})
 function approveItem(id) {
-  actionForm.patch(route('admin.assets.approve', id))
+  actionForm.post(route('admin.assets.approve', id))
 }
 function declineItem(id) {
-  actionForm.delete(route('admin.assets.decline', id))
+  actionForm.post(route('admin.assets.decline', id))
 }
 </script>

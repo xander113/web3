@@ -13,6 +13,15 @@ use Inertia\Inertia;
 
 class DiagnosticsController extends Controller
 {
+    private function resolveComputeUrl(): string
+    {
+        $url = trim((string)(config('graphictoria.cloud_compute_url') ?? ''));
+        // Must start with http:// or https://
+        if (!$url || !preg_match('#^https?://#i', $url)) return '';
+        return rtrim($url, '/');
+    }
+
+
     public function index()
     {
         return Inertia::render('Admin/Diagnostics', [
@@ -27,7 +36,7 @@ class DiagnosticsController extends Controller
      */
     public function pingCloudCompute(Request $request)
     {
-        $url = config('graphictoria.cloud_compute_url');
+        $url = $this->resolveComputeUrl();
         if (!$url) {
             return response()->json(['ok' => false, 'error' => 'CLOUD_COMPUTE_URL is not set in .env']);
         }
@@ -53,10 +62,10 @@ class DiagnosticsController extends Controller
     {
         $request->validate(['user_id' => ['required', 'integer', 'exists:users,id']]);
         $userId  = $request->integer('user_id');
-        $url     = config('graphictoria.cloud_compute_url');
+        $url     = $this->resolveComputeUrl();
 
         if (!$url) {
-            return response()->json(['ok' => false, 'error' => 'CLOUD_COMPUTE_URL not configured']);
+            return response()->json(['ok' => false, 'error' => 'CLOUD_COMPUTE_URL is not set in .env']);
         }
 
         $start = microtime(true);
@@ -87,10 +96,10 @@ class DiagnosticsController extends Controller
         $request->validate(['item_id' => ['required', 'integer', 'exists:catalog_items,id']]);
         $itemId = $request->integer('item_id');
         $item   = CatalogItem::findOrFail($itemId);
-        $url    = config('graphictoria.cloud_compute_url');
+        $url    = $this->resolveComputeUrl();
 
         if (!$url) {
-            return response()->json(['ok' => false, 'error' => 'CLOUD_COMPUTE_URL not configured']);
+            return response()->json(['ok' => false, 'error' => 'CLOUD_COMPUTE_URL is not set in .env']);
         }
 
         if (!$item->data_file) {
@@ -131,10 +140,10 @@ class DiagnosticsController extends Controller
 
         $count   = $request->integer('count');
         $type    = $request->input('type');
-        $url     = config('graphictoria.cloud_compute_url');
+        $url     = $this->resolveComputeUrl();
 
         if (!$url) {
-            return response()->json(['ok' => false, 'error' => 'CLOUD_COMPUTE_URL not configured']);
+            return response()->json(['ok' => false, 'error' => 'CLOUD_COMPUTE_URL is not set in .env']);
         }
 
         if ($type === 'avatar') {

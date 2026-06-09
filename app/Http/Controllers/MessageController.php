@@ -52,7 +52,7 @@ class MessageController extends Controller
             'body' => $request->body,
         ]);
         $message->load('sender');
-        broadcast(new MessageSent($message))->toOthers();
+        try { broadcast(new MessageSent($message))->toOthers(); } catch (\Exception) {}
         return redirect()->route('messages.index')->with('success', 'Message sent.');
     }
 

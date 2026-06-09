@@ -20,13 +20,13 @@
           <tbody class="divide-y divide-gray-700">
             <tr v-for="report in reports.data" :key="report.id" class="hover:bg-gray-750">
               <td class="px-4 py-3">
-                <Link :href="route('profile.show', report.reporter?.username)" class="text-indigo-400 hover:underline">
+                <Link :href="route('profile.show', report.reporter?.id)" class="text-indigo-400 hover:underline">
                   {{ report.reporter?.username ?? 'Unknown' }}
                 </Link>
               </td>
               <td class="px-4 py-3">
-                <Link :href="route('profile.show', report.reported?.username)" class="text-indigo-400 hover:underline">
-                  {{ report.reported?.username ?? 'Unknown' }}
+                <Link :href="route('profile.show', report.reportedUser?.id)" class="text-indigo-400 hover:underline">
+                  {{ report.reportedUser?.username ?? 'Unknown' }}
                 </Link>
               </td>
               <td class="px-4 py-3 text-gray-300 max-w-xs">
@@ -80,11 +80,13 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const actionForm = useForm({})
+const resolveForm = useForm({ status: 'reviewed' })
+const dismissForm = useForm({ status: 'dismissed' })
+
 function resolveReport(id) {
-  actionForm.patch(route('admin.reports.resolve', id))
+  resolveForm.post(route('admin.reports.resolve', id))
 }
 function dismissReport(id) {
-  actionForm.delete(route('admin.reports.dismiss', id))
+  dismissForm.post(route('admin.reports.dismiss', id))
 }
 </script>

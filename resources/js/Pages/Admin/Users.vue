@@ -27,7 +27,7 @@
         <tbody class="divide-y divide-gray-700">
           <tr v-for="user in users.data" :key="user.id" class="hover:bg-gray-750">
             <td class="px-4 py-3">
-              <Link :href="route('profile.show', user.username)" class="text-indigo-400 hover:underline font-medium">
+              <Link :href="route('profile.show', user.id)" class="text-indigo-400 hover:underline font-medium">
                 {{ user.username }}
               </Link>
             </td>
