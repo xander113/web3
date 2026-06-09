@@ -6,11 +6,17 @@
     <!-- Config status -->
     <div class="gt-panel mb-6">
       <h2 class="font-semibold mb-3" style="color:#17BCCF;">Environment Configuration</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
         <div class="rounded p-3" style="background:#1a1a1a; border:1px solid #333;">
-          <p class="text-gray-500 text-xs mb-1">CLOUD_COMPUTE_URL</p>
-          <p :class="cloudComputeUrl ? 'text-green-400' : 'text-red-400'" class="font-mono text-xs break-all">
-            {{ cloudComputeUrl || 'Not set' }}
+          <p class="text-gray-500 text-xs mb-1">CLOUD_COMPUTE_PORT</p>
+          <p :class="cloudComputePort ? 'text-green-400' : 'text-red-400'" class="font-mono text-xs">
+            {{ cloudComputePort ? `127.0.0.1:${cloudComputePort}` : 'Not configured' }}
+          </p>
+        </div>
+        <div class="rounded p-3" style="background:#1a1a1a; border:1px solid #333;">
+          <p class="text-gray-500 text-xs mb-1">Cloud Compute Path</p>
+          <p :class="cloudComputePath ? 'text-green-400' : 'text-yellow-500'" class="font-mono text-xs break-all">
+            {{ cloudComputePath || 'Set G5_CLIENT_PATH to derive' }}
           </p>
         </div>
         <div class="rounded p-3" style="background:#1a1a1a; border:1px solid #333;">
@@ -147,9 +153,10 @@ import AppLayout from '@/Components/AppLayout.vue'
 import axios from 'axios'
 
 const props = defineProps({
-  cloudComputeUrl: { type: String, default: '' },
-  clientPath:      { type: String, default: '' },
-  studioPath:      { type: String, default: '' },
+  cloudComputePort: { type: Number, default: null },
+  cloudComputePath: { type: String, default: null },
+  clientPath:       { type: String, default: '' },
+  studioPath:       { type: String, default: '' },
 })
 
 const inputs = reactive({

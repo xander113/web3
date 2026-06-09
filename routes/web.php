@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/games/new', [GameServerController::class, 'create'])->name('games.create');
     Route::post('/games', [GameServerController::class, 'store'])->name('games.store');
     Route::get('/games/{id}/launch', [GameApiController::class, 'launch'])->name('games.launch');
+    Route::post('/games/{id}/dev-launch', [GameApiController::class, 'devLaunch'])->name('games.dev_launch');
     Route::get('/studio/{id}/launch', [GameApiController::class, 'launchStudio'])->name('studio.launch');
 
     // Admin

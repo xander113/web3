@@ -3,7 +3,8 @@
 return [
     /*
     |----------------------------------------------------------------------
-    | Local path to GraphictoriaPlayer.exe (developer machines only).
+    | Local path to the Graphictoria5 Client directory (developer machines).
+    | The player exe is expected to live inside this directory.
     | Leave blank in production — the client is installed by the user.
     |----------------------------------------------------------------------
     */
@@ -11,17 +12,18 @@ return [
 
     /*
     |----------------------------------------------------------------------
-    | Local path to GraphictoriaStudio.exe (developer machines only).
+    | Local path to the Graphictoria5 Studio directory (developer machines).
     |----------------------------------------------------------------------
     */
     'studio_path' => env('G5_STUDIO_PATH', ''),
 
     /*
     |----------------------------------------------------------------------
-    | Base URL of the Cloud Compute Service (GtoriaCompute).
-    | Example: http://localhost:9000
-    | Leave blank to disable avatar/thumbnail rendering.
+    | Port the Cloud Compute Service (GtoriaCompute) listens on.
+    | The service is always reached at http://127.0.0.1:{port}.
+    | Its executable is resolved from dirname(G5_CLIENT_PATH)/Cloud Compute Service/.
+    | Set to 0 / leave blank to disable rendering.
     |----------------------------------------------------------------------
     */
-    'cloud_compute_url' => env('CLOUD_COMPUTE_URL', ''),
+    'cloud_compute_port' => (int) env('CLOUD_COMPUTE_PORT', 0),
 ];

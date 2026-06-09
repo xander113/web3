@@ -15,19 +15,26 @@ class DiagnosticsController extends Controller
 {
     private function resolveComputeUrl(): string
     {
-        $url = trim((string)(config('graphictoria.cloud_compute_url') ?? ''));
-        // Must start with http:// or https://
-        if (!$url || !preg_match('#^https?://#i', $url)) return '';
-        return rtrim($url, '/');
+        $port = (int) config('graphictoria.cloud_compute_port', 0);
+        if (!$port) return '';
+        return "http://127.0.0.1:{$port}";
     }
 
+    private function resolveComputePath(): string
+    {
+        $clientPath = trim((string) config('graphictoria.client_path'));
+        if (!$clientPath) return '';
+        return rtrim(dirname($clientPath), '/\\') . DIRECTORY_SEPARATOR . 'Cloud Compute Service';
+    }
 
     public function index()
     {
+        $port = config('graphictoria.cloud_compute_port');
         return Inertia::render('Admin/Diagnostics', [
-            'cloudComputeUrl' => config('graphictoria.cloud_compute_url'),
-            'clientPath'      => config('graphictoria.client_path'),
-            'studioPath'      => config('graphictoria.studio_path'),
+            'cloudComputePort' => $port ?: null,
+            'cloudComputePath' => $this->resolveComputePath() ?: null,
+            'clientPath'       => config('graphictoria.client_path'),
+            'studioPath'       => config('graphictoria.studio_path'),
         ]);
     }
 

@@ -45,6 +45,61 @@ class GameApiController extends Controller
     }
 
     /**
+     * Dev-only: execute the game client/studio exe directly on the server machine.
+     * Only works when G5_CLIENT_PATH / G5_STUDIO_PATH is configured.
+     */
+    public function devLaunch(Request $request, string $id)
+    {
+        $request->validate(['type' => ['required', 'in:player,studio']]);
+        $isStudio  = $request->input('type') === 'studio';
+        $basePath  = trim($isStudio
+            ? (string) config('graphictoria.studio_path')
+            : (string) config('graphictoria.client_path'));
+
+        if (!$basePath) {
+            return response()->json(['ok' => false, 'error' => $isStudio ? 'G5_STUDIO_PATH not set' : 'G5_CLIENT_PATH not set']);
+        }
+
+        $server   = GameServer::findOrFail($id);
+        $user     = Auth::user();
+        $ticket   = Str::random(64);
+        $issuedAt = now()->timestamp;
+
+        Cache::put("game_ticket:{$ticket}", [
+            'user_id'   => $user->id,
+            'server_id' => $server->id,
+            'issued_at' => $issuedAt,
+        ], now()->addMinutes(5));
+
+        $baseUrl          = config('app.url');
+        $placeLauncherUrl = urlencode("{$baseUrl}/Game/PlaceLauncher.ashx?request=RequestGame&placeId={$server->id}&isPartyLeader=false&gender=&isTeleport=false");
+
+        if ($isStudio) {
+            $uri = "graphictoria-studio://1+launchmode:edit+gameinfo:{$ticket}+launchtime:{$issuedAt}+placeId:{$server->id}+baseUrl:" . urlencode($baseUrl);
+        } else {
+            $uri = "graphictoria://1+launchmode:play+gameinfo:{$ticket}+launchtime:{$issuedAt}+placelauncherurl:{$placeLauncherUrl}";
+        }
+
+        // Find the exe in the configured directory
+        $exeGlob = glob(rtrim(str_replace('\\', '/', $basePath), '/') . '/*.exe') ?: [];
+        if (empty($exeGlob)) {
+            return response()->json(['ok' => false, 'error' => "No .exe found in: {$basePath}"]);
+        }
+        $exe = $exeGlob[0];
+
+        // Launch the process detached — works on Windows (start "") and Linux (nohup)
+        if (PHP_OS_FAMILY === 'Windows') {
+            $cmd = 'start "" ' . escapeshellarg($exe) . ' ' . escapeshellarg($uri);
+            pclose(popen($cmd, 'r'));
+        } else {
+            $cmd = 'nohup ' . escapeshellarg($exe) . ' ' . escapeshellarg($uri) . ' > /dev/null 2>&1 &';
+            exec($cmd);
+        }
+
+        return response()->json(['ok' => true, 'exe' => basename($exe), 'uri' => $uri]);
+    }
+
+    /**
      * Launch Graphictoria Studio for a game server/place.
      */
     public function launchStudio(string $id)
