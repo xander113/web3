@@ -13,10 +13,10 @@
             class="flex items-center justify-between bg-gray-700 rounded px-3 py-2"
           >
             <div>
-              <p class="text-sm text-gray-200 font-medium">{{ item.name }}</p>
+              <p class="text-sm text-gray-200 font-medium">{{ item.item?.name ?? item.type }}</p>
               <p class="text-xs text-gray-500 capitalize">{{ item.type }}</p>
             </div>
-            <form @submit.prevent="unequip(item.id)">
+            <form @submit.prevent="unequip(item.catalog_item_id)">
               <button class="text-xs text-red-400 hover:text-red-300">Unequip</button>
             </form>
           </div>
@@ -46,7 +46,7 @@
           <button
             v-for="tab in typeTabs"
             :key="tab.value"
-            @click="currentType = tab.value"
+            @click="switchType(tab.value)"
             :class="[
               'px-3 py-1 rounded text-sm font-medium transition',
               currentType === tab.value ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600',
@@ -61,19 +61,19 @@
             class="bg-gray-800 rounded-lg p-3 flex flex-col gap-2"
           >
             <div class="aspect-square bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs">
-              <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="w-full h-full object-cover rounded" />
+              <img v-if="item.item?.data_file" :src="`/catalog/thumbnail/${item.item.type}/${item.item.data_file}.png`" :alt="item.item?.name" class="w-full h-full object-cover rounded" />
               <span v-else>No image</span>
             </div>
-            <p class="text-xs font-medium text-gray-200 truncate">{{ item.name }}</p>
-            <form @submit.prevent="equip(item.id)">
+            <p class="text-xs font-medium text-gray-200 truncate">{{ item.item?.name }}</p>
+            <form @submit.prevent="equip(item.catalog_item_id)">
               <button
                 :class="[
                   'w-full text-xs py-1 rounded font-medium',
-                  isEquipped(item.id)
+                  isEquipped(item.catalog_item_id)
                     ? 'bg-red-800 hover:bg-red-700 text-red-200'
                     : 'bg-indigo-600 hover:bg-indigo-500 text-white',
                 ]"
-              >{{ isEquipped(item.id) ? 'Unequip' : 'Equip' }}</button>
+              >{{ isEquipped(item.catalog_item_id) ? 'Unequip' : 'Equip' }}</button>
             </form>
           </div>
         </div>
@@ -110,7 +110,6 @@ const props = defineProps({
 })
 
 const currentType = ref(props.currentType)
-const colorValues = ref({ ...props.colors })
 
 const typeTabs = [
   { label: 'All', value: '' },
@@ -132,26 +131,41 @@ const bodyParts = [
   { key: 'right_leg', label: 'Right Leg' },
 ]
 
-const filteredItems = computed(() => {
-  const items = props.ownedItems.data ?? []
-  if (!currentType.value) return items
-  return items.filter((i) => i.type === currentType.value)
-})
+// Extract just the hex color string for each body part (colors prop is keyed by type)
+const colorValues = ref(
+  Object.fromEntries(
+    bodyParts.map(p => [
+      p.key,
+      (typeof props.colors[p.key] === 'object'
+        ? props.colors[p.key]?.color
+        : props.colors[p.key]) ?? '#FFCC99',
+    ])
+  )
+)
 
-function isEquipped(itemId) {
-  return props.equipped.some((e) => e.id === itemId)
+// Filtering is done server-side via ?type= query param
+const filteredItems = computed(() => props.ownedItems.data ?? [])
+
+function switchType(type) {
+  currentType.value = type
+  router.get(route('character.index'), { type }, { preserveState: true, replace: true })
+}
+
+// Compare catalog_item_id not the equipped_items.id row id
+function isEquipped(catalogItemId) {
+  return props.equipped.some((e) => e.catalog_item_id === catalogItemId)
 }
 
 const actionForm = useForm({})
-function equip(itemId) {
-  if (isEquipped(itemId)) {
-    actionForm.delete(route('character.unequip', itemId))
+function equip(catalogItemId) {
+  if (isEquipped(catalogItemId)) {
+    actionForm.post(route('character.unequip', catalogItemId))
   } else {
-    actionForm.post(route('character.equip', itemId))
+    actionForm.post(route('character.equip', catalogItemId))
   }
 }
-function unequip(itemId) {
-  actionForm.delete(route('character.unequip', itemId))
+function unequip(catalogItemId) {
+  actionForm.post(route('character.unequip', catalogItemId))
 }
 
 let colorDebounce = null
@@ -159,7 +173,9 @@ function updateColor(part, value) {
   colorValues.value[part] = value
   clearTimeout(colorDebounce)
   colorDebounce = setTimeout(() => {
-    router.patch(route('character.colors'), { colors: colorValues.value }, { preserveState: true })
+    // Convert to array format the server expects: [{type, color}, ...]
+    const colorArray = bodyParts.map(p => ({ type: p.key, color: colorValues.value[p.key] }))
+    router.patch(route('character.colors'), { colors: colorArray }, { preserveState: true })
   }, 600)
 }
 </script>

@@ -18,7 +18,7 @@ class ForumController extends Controller
         return Inertia::render('Forum/Index', ['categories' => $categories]);
     }
 
-    public function showForum(int $id)
+    public function showForum(string $id)
     {
         $forum = Forum::findOrFail($id);
         $topics = ForumTopic::where('forum_id', $id)
@@ -28,7 +28,7 @@ class ForumController extends Controller
         return Inertia::render('Forum/Forum', ['forum' => $forum, 'topics' => $topics]);
     }
 
-    public function showTopic(int $id)
+    public function showTopic(string $id)
     {
         $topic = ForumTopic::with('user:id,username,rank,post_count,created_at')->findOrFail($id);
         $replies = ForumReply::where('topic_id', $id)
@@ -38,7 +38,7 @@ class ForumController extends Controller
         return Inertia::render('Forum/Topic', ['topic' => $topic, 'replies' => $replies]);
     }
 
-    public function createTopic(int $forumId)
+    public function createTopic(string $forumId)
     {
         $forum = Forum::findOrFail($forumId);
         return Inertia::render('Forum/CreateTopic', ['forum' => $forum]);
@@ -64,7 +64,7 @@ class ForumController extends Controller
         return redirect()->route('forum.topic.show', $topic->id);
     }
 
-    public function storeReply(Request $request, int $topicId)
+    public function storeReply(Request $request, string $topicId)
     {
         $request->validate(['body' => ['required', 'string', 'min:3']]);
         $topic = ForumTopic::findOrFail($topicId);
@@ -85,7 +85,7 @@ class ForumController extends Controller
         return back()->with('success', 'Reply posted.');
     }
 
-    public function deleteTopic(int $id)
+    public function deleteTopic(string $id)
     {
         $topic = ForumTopic::findOrFail($id);
         if ($topic->user_id !== Auth::id() && !Auth::user()->isModerator()) abort(403);
@@ -94,7 +94,7 @@ class ForumController extends Controller
         return redirect()->route('forum.index')->with('success', 'Topic deleted.');
     }
 
-    public function deleteReply(int $id)
+    public function deleteReply(string $id)
     {
         $reply = ForumReply::findOrFail($id);
         if ($reply->user_id !== Auth::id() && !Auth::user()->isModerator()) abort(403);

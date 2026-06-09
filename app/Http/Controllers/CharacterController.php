@@ -28,7 +28,7 @@ class CharacterController extends Controller
         ]);
     }
 
-    public function equip(int $catalogItemId)
+    public function equip(string $catalogItemId)
     {
         $owned = OwnedItem::where('user_id', Auth::id())->where('catalog_item_id', $catalogItemId)->firstOrFail();
         $item = $owned->item;
@@ -45,7 +45,7 @@ class CharacterController extends Controller
         return back()->with('success', 'Item equipped.');
     }
 
-    public function unequip(int $catalogItemId)
+    public function unequip(string $catalogItemId)
     {
         EquippedItem::where('user_id', Auth::id())->where('catalog_item_id', $catalogItemId)->delete();
         return back()->with('success', 'Item removed.');

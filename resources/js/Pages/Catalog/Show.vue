@@ -7,8 +7,8 @@
         <!-- Image -->
         <div class="w-full sm:w-48 shrink-0">
           <div class="aspect-square bg-gray-700 rounded-lg flex items-center justify-center text-gray-500">
-            <span v-if="!item.image_url">No image</span>
-            <img v-else :src="item.image_url" :alt="item.name" class="w-full h-full object-cover rounded-lg" />
+            <span v-if="!item.data_file">No image</span>
+            <img v-else :src="`/catalog/thumbnail/${item.type}/${item.data_file}.png`" :alt="item.name" class="w-full h-full object-cover rounded-lg" />
           </div>
         </div>
 

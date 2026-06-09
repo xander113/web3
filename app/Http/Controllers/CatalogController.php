@@ -5,6 +5,8 @@ use App\Models\CatalogItem;
 use App\Models\OwnedItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class CatalogController extends Controller
@@ -21,14 +23,14 @@ class CatalogController extends Controller
         return Inertia::render('Catalog/Index', ['items' => $items, 'type' => $request->type, 'search' => $request->search]);
     }
 
-    public function show(int $id)
+    public function show(string $id)
     {
         $item = CatalogItem::with('creator:id,username')->findOrFail($id);
         $owned = Auth::check() && OwnedItem::where('user_id', Auth::id())->where('catalog_item_id', $id)->exists();
         return Inertia::render('Catalog/Show', ['item' => $item, 'owned' => $owned]);
     }
 
-    public function buy(int $id)
+    public function buy(string $id)
     {
         $item = CatalogItem::where('id', $id)->where('approved', true)->where('deleted', false)->firstOrFail();
         $user = Auth::user();
@@ -51,18 +53,55 @@ class CatalogController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:100'],
+            'name'        => ['required', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:500'],
-            'type' => ['required', 'in:hat,head,face,shirt,pants,tshirt,gear,decal'],
-            'price' => ['required', 'integer', 'min:0', 'max:99999'],
+            'type'        => ['required', 'in:hat,head,face,shirt,pants,tshirt,gear,decal'],
+            'price'       => ['required', 'integer', 'min:0', 'max:99999'],
+            'model_file'  => ['nullable', 'file', 'max:51200'],
+            'image_file'  => ['nullable', 'file', 'max:4096', 'mimes:png,jpg,jpeg'],
         ]);
+
+        $dataFile = null;
+        if ($request->hasFile('model_file')) {
+            $dataFile = Str::uuid()->toString();
+            $request->file('model_file')->storeAs(
+                'assets/' . $request->type,
+                $dataFile . '.rbxm',
+                'local'
+            );
+        }
+
+        if ($request->hasFile('image_file') && $dataFile) {
+            Storage::disk('local')->makeDirectory('assets/' . $request->type . '/thumbnail');
+            $request->file('image_file')->storeAs(
+                'assets/' . $request->type . '/thumbnail',
+                $dataFile . '.png',
+                'local'
+            );
+        }
+
         CatalogItem::create([
-            'creator_id' => Auth::id(),
-            'name' => $request->name,
+            'creator_id'  => Auth::id(),
+            'name'        => $request->name,
             'description' => $request->description,
-            'type' => $request->type,
-            'price' => $request->price,
+            'type'        => $request->type,
+            'price'       => $request->price,
+            'data_file'   => $dataFile,
         ]);
         return redirect()->route('catalog.index')->with('success', 'Item submitted for approval.');
+    }
+
+    public function serveAsset(string $type, string $file)
+    {
+        $path = 'assets/' . $type . '/' . $file;
+        if (!Storage::disk('local')->exists($path)) abort(404);
+        return response()->file(Storage::disk('local')->path($path));
+    }
+
+    public function serveThumbnail(string $type, string $file)
+    {
+        $path = 'assets/' . $type . '/thumbnail/' . $file;
+        if (!Storage::disk('local')->exists($path)) abort(404);
+        return response()->file(Storage::disk('local')->path($path));
     }
 }

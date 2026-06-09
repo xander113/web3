@@ -113,15 +113,32 @@
       </div>
 
       <!-- Game Servers -->
-      <div v-if="profile.gameServers && profile.gameServers.length" class="bg-gray-800 rounded-xl p-6">
-        <h2 class="text-lg font-semibold mb-3 text-indigo-400">Game Servers</h2>
+      <div v-if="profile.gameServers && profile.gameServers.length" class="gt-panel">
+        <h2 class="text-lg font-semibold mb-3" style="color:#17BCCF;">Game Servers</h2>
         <div class="space-y-2">
           <div
             v-for="server in profile.gameServers"
             :key="server.id"
-            class="bg-gray-700 rounded px-3 py-2 text-sm text-gray-200"
+            class="flex items-center justify-between rounded px-3 py-2 text-sm"
+            style="background:#333; border:1px solid #444;"
           >
-            {{ server.name }}
+            <div>
+              <p class="font-medium text-gray-200">{{ server.name }}</p>
+              <p v-if="server.description" class="text-xs text-gray-500 mt-0.5">{{ server.description }}</p>
+            </div>
+            <div class="flex gap-2 ml-3 shrink-0">
+              <Link v-if="auth.user" :href="route('games.launch', server.id)"
+                    class="btn-flat px-3 py-1 text-xs text-white font-semibold"
+                    style="background:#1b6182; text-decoration:none;">
+                Play
+              </Link>
+              <Link v-if="auth.user && auth.user.id === profile.id"
+                    :href="route('studio.launch', server.id)"
+                    class="btn-flat px-3 py-1 text-xs text-white font-semibold"
+                    style="background:#444; text-decoration:none;">
+                Studio
+              </Link>
+            </div>
           </div>
         </div>
       </div>

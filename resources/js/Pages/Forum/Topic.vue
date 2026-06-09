@@ -18,7 +18,7 @@
       <!-- Original post -->
       <div class="bg-gray-800 rounded-xl p-5">
         <div class="flex items-center justify-between mb-3">
-          <Link :href="route('profile.show', topic.user?.username)" class="flex items-center gap-2 hover:opacity-80">
+          <Link :href="route('profile.show', topic.user?.id)" class="flex items-center gap-2 hover:opacity-80">
             <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">
               {{ (topic.user?.username ?? '?')[0].toUpperCase() }}
             </div>
@@ -35,7 +35,7 @@
       <!-- Replies -->
       <div v-for="reply in replyList" :key="reply.id" class="bg-gray-800 rounded-xl p-5">
         <div class="flex items-center justify-between mb-3">
-          <Link :href="route('profile.show', reply.user?.username)" class="flex items-center gap-2 hover:opacity-80">
+          <Link :href="route('profile.show', reply.user?.id)" class="flex items-center gap-2 hover:opacity-80">
             <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">
               {{ (reply.user?.username ?? '?')[0].toUpperCase() }}
             </div>
@@ -109,7 +109,8 @@ function formatDate(dateStr) {
 
 function canDelete(post) {
   if (!auth.value.user) return false
-  return auth.value.user.id === post.user_id || auth.value.user.is_admin || auth.value.user.is_mod
+  // rank 1 = admin, rank 2 = moderator — both rank >= 1 can moderate
+  return auth.value.user.id === post.user_id || auth.value.user.rank >= 1
 }
 
 const replyForm = useForm({ body: '' })
@@ -122,7 +123,7 @@ function submitReply() {
 const deleteForm = useForm({})
 function deletePost(type, id) {
   if (!confirm('Delete this post?')) return
-  const routeName = type === 'topic' ? 'forum.topic.destroy' : 'forum.reply.destroy'
+  const routeName = type === 'topic' ? 'forum.topic.delete' : 'forum.reply.delete'
   deleteForm.delete(route(routeName, id))
 }
 
@@ -130,9 +131,10 @@ let topicChannel = null
 onMounted(() => {
   if (!window.Echo) return
   topicChannel = window.Echo.channel(`topic.${props.topic.id}`)
+  // broadcastWith() returns {id, body, user, created_at} directly (not wrapped in .reply)
   topicChannel.listen('ForumReplyPosted', (e) => {
-    if (!replyList.value.find((r) => r.id === e.reply.id)) {
-      replyList.value.push(e.reply)
+    if (!replyList.value.find((r) => r.id === e.id)) {
+      replyList.value.push(e)
     }
   })
 })

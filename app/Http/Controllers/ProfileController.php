@@ -7,7 +7,7 @@ use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
-    public function show(int $id)
+    public function show(string $id)
     {
         $user = User::with(['badges', 'friends' => fn($q) => $q->take(6), 'groups', 'gameServers', 'equippedItems.item'])->findOrFail($id);
         $isFriend = Auth::check() && Auth::user()->friends()->where('friend_id', $id)->exists();

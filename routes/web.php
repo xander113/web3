@@ -6,6 +6,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendController;
+use App\Http\Controllers\GameApiController;
 use App\Http\Controllers\GameServerController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
@@ -43,13 +44,17 @@ Route::prefix('forum')->name('forum.')->group(function () {
     Route::get('/t/{id}', [ForumController::class, 'showTopic'])->name('topic.show');
 });
 
-// Catalog (public read)
+// Catalog (public read) — upload/asset routes MUST be before /{id} wildcard
 Route::prefix('catalog')->name('catalog.')->group(function () {
     Route::get('/', [CatalogController::class, 'index'])->name('index');
+    Route::get('/upload', [CatalogController::class, 'create'])->middleware('auth')->name('upload');
+    Route::get('/asset/{type}/{file}', [CatalogController::class, 'serveAsset'])->name('asset');
+    Route::get('/thumbnail/{type}/{file}', [CatalogController::class, 'serveThumbnail'])->name('thumbnail');
     Route::get('/{id}', [CatalogController::class, 'show'])->name('show');
 });
 
-// Groups (public read)
+// Groups (public read) — /new MUST be before /{id} wildcard
+Route::get('/groups/new', [GroupController::class, 'create'])->middleware('auth')->name('groups.create');
 Route::get('/groups/{id}', [GroupController::class, 'show'])->name('groups.show');
 
 // Authenticated routes
@@ -85,7 +90,6 @@ Route::middleware('auth')->group(function () {
 
     // Catalog (buy/upload)
     Route::post('/catalog/{id}/buy', [CatalogController::class, 'buy'])->name('catalog.buy');
-    Route::get('/catalog/upload', [CatalogController::class, 'create'])->name('catalog.upload');
     Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
 
     // Character
@@ -95,7 +99,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/character/colors', [CharacterController::class, 'updateColors'])->name('character.colors');
 
     // Groups (write)
-    Route::get('/groups/new', [GroupController::class, 'create'])->name('groups.create');
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
     Route::post('/groups/{id}/join', [GroupController::class, 'join'])->name('groups.join');
     Route::post('/groups/{id}/leave', [GroupController::class, 'leave'])->name('groups.leave');
@@ -103,6 +106,8 @@ Route::middleware('auth')->group(function () {
     // Game Servers
     Route::get('/games/new', [GameServerController::class, 'create'])->name('games.create');
     Route::post('/games', [GameServerController::class, 'store'])->name('games.store');
+    Route::get('/games/{id}/launch', [GameApiController::class, 'launch'])->name('games.launch');
+    Route::get('/studio/{id}/launch', [GameApiController::class, 'launchStudio'])->name('studio.launch');
 
     // Admin
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
@@ -118,3 +123,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/reports/{id}/dismiss', [AdminController::class, 'resolveReport'])->name('reports.dismiss');
     });
 });
+
+// ── Game Client API endpoints (legacy Roblox-compatible paths) ────────────────
+Route::get('/Asset', [GameApiController::class, 'serveAsset'])->name('game.asset');
+Route::get('/Asset/', [GameApiController::class, 'serveAsset']);
+Route::get('/asset', [GameApiController::class, 'serveAsset']);
+Route::get('/asset/', [GameApiController::class, 'serveAsset']);
+Route::get('/Game/PlaceLauncher.ashx', [GameApiController::class, 'placeLauncher'])->name('game.place_launcher');
+Route::get('/Game/LoadPlaceInfo.ashx', [GameApiController::class, 'loadPlaceInfo'])->name('game.place_info');
+Route::get('/Game/Join.ashx', [GameApiController::class, 'join'])->name('game.join');
+Route::get('/Game/Validate.ashx', [GameApiController::class, 'validate'])->name('game.validate');
+Route::any('/AbuseReport/InGameChatHandler.ashx', fn() => response('OK'));
+Route::any('/Game/ChatFilter.ashx', [GameApiController::class, 'chatFilter']);
+Route::get('/Game/Tools/InsertAsset.ashx', [GameApiController::class, 'insertAsset']);
+Route::get('/Thumbs/Avatar.ashx', [GameApiController::class, 'avatarThumb'])->name('game.avatar_thumb');
+Route::get('/Render/Avatar', [GameApiController::class, 'renderAvatar'])->name('game.render_avatar');

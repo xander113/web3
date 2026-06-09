@@ -40,8 +40,8 @@
         class="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 flex flex-col gap-2 transition"
       >
         <div class="aspect-square bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs">
-          <span v-if="!item.image_url">No image</span>
-          <img v-else :src="item.image_url" :alt="item.name" class="w-full h-full object-cover rounded" />
+          <span v-if="!item.data_file">No image</span>
+          <img v-else :src="`/catalog/thumbnail/${item.type}/${item.data_file}.png`" :alt="item.name" class="w-full h-full object-cover rounded" />
         </div>
         <p class="text-sm font-medium text-gray-100 truncate">{{ item.name }}</p>
         <p class="text-xs text-gray-400 capitalize">{{ item.type }}</p>
